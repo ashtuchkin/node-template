@@ -1,0 +1,63 @@
+#!/bin/sh -e
+
+# This is a restart script for the project. It must have the executable bit set.
+
+# Must be called by user git to not screw up file ownership & permissions.
+if [ `whoami` != 'git' ]; then
+    echo "You must be user 'git' to run this script."
+    exit
+fi
+
+# Do not depend on current directory: always move to the git repository root.
+cd "$(dirname "$(readlink -f "$0")")"  # Move to config file directory
+cd "$(git rev-parse --show-toplevel)" # Move to git repository root
+
+PROJECT_DIR=$(pwd)
+PROJECT_NAME=$(basename "$PROJECT_DIR") # Project name is the directory name of the project
+PROJECT_NAME=${PROJECT_NAME%\.git}   # Remove '.git' suffix if exists.
+
+# Install post-receive hook. This is only needed initially, but makes no harm in subsequent calls.
+ln -sf "$PROJECT_DIR/config/post-receive" .git/hooks/post-receive
+
+
+# 1. Update NPM Dependencies, build production files.
+
+# Once a week we update npm modules. Keep last update time in node_modules dir modification time.
+if [ -d 'node_modules' ] && [ -n $(find node_modules -maxdepth 0 -mtime +7) ]; then
+    npm update
+    touch node_modules
+fi
+
+# Install missing npm modules and run post-install hook to build production files.
+npm install -q --production
+
+
+# 2. Template, test & reload Nginx configuration.
+
+# Source project parameters to get the $PORT variable.
+. .env
+
+sudo sed -e "s#{{PROJECT_NAME}}#$PROJECT_NAME#g" \
+         -e "s#{{PROJECT_DIR}}#$PROJECT_DIR#g" \
+         -e "s#{{PORT}}#$PORT#g" \
+         config/nginx > /etc/nginx/sites-enabled/$PROJECT_NAME
+
+sudo nginx -t -q
+sudo nginx -s reload
+
+
+# 3. (Re)start project - ubuntu specific
+
+# Manually copy the upstart job as the symlink doesn't get started on server restart. 
+sudo cp -f config/upstart.conf /etc/init/$PROJECT_NAME.conf  
+
+sudo initctl reload-configuration
+sudo stop $PROJECT_NAME || true
+sudo start $PROJECT_NAME
+
+# 4. Look into the log file - it should output that is started correctly.
+
+sudo tail -n 0 -q -f /var/log/upstart/$PROJECT_NAME.log &
+P=$!
+sleep 5
+sudo kill $P

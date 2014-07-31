@@ -1,0 +1,33 @@
+{
+    "name": "node-template",
+    "version": "0.1.0",
+    "private": true,
+
+    "dependencies": {
+        "coffee-script": "1.7",
+
+        "express": "4",
+        "body-parser": "",
+        "cookie-parser": "",
+        "errorhandler": "",
+        "morgan": "",
+
+        "jade": "",
+        "less-middleware": "",
+        "coffee-middleware": "",
+        "mongoose": "3.8",
+
+        "marked": "",
+        "js-yaml": "",
+        "uploadcare": "",
+        "errto": "",
+        "async": "",
+        "nodemailer": "",
+
+        "gulp": ""
+    },
+
+    "scripts": {
+        "postinstall": "gulp prepare-production"
+    }
+}

@@ -1,0 +1,27 @@
+#!/bin/sh -e
+
+# This is a post-receive hook for the project. It must have the executable bit set.
+
+# Must be called by user git to not screw up file ownership & permissions.
+if [ $(whoami) != "git" ]; then
+    echo "You must be user 'git' to run this script."
+    exit
+fi
+
+# http://stackoverflow.com/questions/11395398/git-push-failing-refusing-to-update-checked-out-branch
+# Drop the env var given to post-receive by default, as it'll mess up our attempts to use git "normally."
+unset GIT_DIR
+
+# Do not depend on current directory: always move to the git repository root.
+cd "$(dirname "$(readlink -f "$0")")"  # Move to config file directory
+cd "$(git rev-parse --show-toplevel)" # Move to git repository root
+
+# Check out current branch to working tree.
+# This drops all previous changes to index and working tree.
+git reset --hard
+
+# Show short status, just in case (should be empty)
+git status -s
+
+# Restart the service.
+config/restart
