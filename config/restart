@@ -37,10 +37,10 @@ npm install -q --production
 # Source project parameters to get the $PORT variable.
 . ./.env
 
-sudo sed -e "s#{{PROJECT_NAME}}#$PROJECT_NAME#g" \
-         -e "s#{{PROJECT_DIR}}#$PROJECT_DIR#g" \
-         -e "s#{{PORT}}#$PORT#g" \
-         config/nginx > /etc/nginx/sites-enabled/$PROJECT_NAME
+sed -e "s#{{PROJECT_NAME}}#$PROJECT_NAME#g" \
+    -e "s#{{PROJECT_DIR}}#$PROJECT_DIR#g" \
+    -e "s#{{PORT}}#$PORT#g" \
+    config/nginx | sudo tee /etc/nginx/sites-enabled/$PROJECT_NAME > /dev/null
 
 sudo nginx -t -q
 sudo nginx -s reload
