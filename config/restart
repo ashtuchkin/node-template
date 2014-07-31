@@ -35,7 +35,7 @@ npm install -q --production
 # 2. Template, test & reload Nginx configuration.
 
 # Source project parameters to get the $PORT variable.
-. .env
+. ./.env
 
 sudo sed -e "s#{{PROJECT_NAME}}#$PROJECT_NAME#g" \
          -e "s#{{PROJECT_DIR}}#$PROJECT_DIR#g" \
