@@ -1,6 +1,6 @@
 
 server {
-    server_name {{PROJECT_NAME}}.com {{PROJECT_NAME}}.io;
+    server_name {{DOMAINS}};
 
     listen 80;
 

@@ -37,12 +37,11 @@ npm run-script prepare-production --loglevel silent
 
 # 2. Template, test & reload Nginx configuration.
 
-# Source project parameters to get the $PORT variable.
+# Source project parameters to get the $PORT, $DOMAINS and other variables.
 . ./.env
 
-sed -e "s#{{PROJECT_NAME}}#$PROJECT_NAME#g" \
-    -e "s#{{PROJECT_DIR}}#$PROJECT_DIR#g" \
-    -e "s#{{PORT}}#$PORT#g" \
+# Template nginx config - replace {{VAR}} with their values in current scope
+sed -f <((set -o posix ; set) | sed -n -e "s/\(.*\)=\(.*\)/s#{{\1}}#\2#g/p")
     config/nginx | sudo tee /etc/nginx/sites-enabled/$PROJECT_NAME > /dev/null
 
 sudo nginx -t -q
