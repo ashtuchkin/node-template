@@ -8,7 +8,7 @@ TODO: Documentation.
 
 ```bash
 
-# 1. On server, ssh git@host:
+# 1. On server, ssh git@<host>:
 > mkdir <project name>
 > cd <project name>
 > git init
@@ -17,14 +17,15 @@ TODO: Documentation.
 # 2. On client: 
 > git remote add prod git@<host>:<project name>
 > git push prod master
-> git config branch.beta.remote beta
-> git config branch.beta.merge refs/heads/beta
 
 # 3. On server:
 > git checkout master
 > cp .env.sample .env
 > nano .env # Edit env variables as needed.
 > config/restart
+
+# 4. After installation, deploy is performed as (on client):
+> git push prod
 
 ```
 
