@@ -41,7 +41,7 @@ npm run-script prepare-production --loglevel silent
 . ./.env
 
 # Template nginx config - replace {{VAR}} with their values in current scope, or empty string if not found.
-sed -f <(set | sed -n -e "s/^\([A-Z0-9_]*\)=\(.*\)/s#{{\1}}#\2#g/p") -e "s/{{.*}}//g"
+sed -f <(set | sed -n -e "s/^\([A-Z0-9_]*\)=\(.*\)/s#{{\1}}#\2#g/p") -e "s/{{.*}}//g" \
     config/nginx | sudo tee /etc/nginx/sites-enabled/$PROJECT_NAME > /dev/null
 
 sudo nginx -t -q
