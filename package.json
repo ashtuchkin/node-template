@@ -28,6 +28,6 @@
     },
 
     "scripts": {
-        "postinstall": "gulp prepare-production --silent"
+        "prepare-production": "gulp prepare-production --silent"
     }
 }

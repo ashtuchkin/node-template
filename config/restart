@@ -22,14 +22,17 @@ ln -sf "$PROJECT_DIR/config/post-receive" .git/hooks/post-receive
 
 # 1. Update NPM Dependencies, build production files.
 
+# Install missing npm modules.
+npm install -q --production
+
 # Once a week we update npm modules. Keep last update time in node_modules dir modification time.
-if [ -d 'node_modules' ] && [ -n "$(find node_modules -maxdepth 0 -mtime +7)" ]; then
+if [ -n "$(find node_modules -maxdepth 0 -mtime +7)" ]; then
     npm update
     touch node_modules
 fi
 
-# Install missing npm modules and run post-install hook to build production files.
-npm install -q --production
+# Build production files.
+npm run-script prepare-production --loglevel silent
 
 
 # 2. Template, test & reload Nginx configuration.
