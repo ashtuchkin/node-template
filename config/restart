@@ -19,6 +19,15 @@ PROJECT_NAME=${PROJECT_NAME%\.git}   # Remove '.git' suffix if exists.
 # Install post-receive hook. This is only needed initially, but makes no harm in subsequent calls.
 ln -sf "$PROJECT_DIR/config/post-receive" .git/hooks/post-receive
 
+# Load project parameters to get the $PORT, $DOMAINS and other variables.
+. ./.env
+
+# Small templating: replace {{VAR}} to its current scope value, or empty string.
+# Usage: template <infile> > <outfile>
+template() {
+    sed -f <(set | sed -n -e "s/^\([A-Z0-9_]*\)=\(.*\)/s#{{\1}}#\2#g/p") -e "s/{{.*}}//g" $1
+}
+
 
 # 1. Update NPM Dependencies, build production files.
 
@@ -37,12 +46,7 @@ npm run-script prepare-production --loglevel silent
 
 # 2. Template, test & reload Nginx configuration.
 
-# Source project parameters to get the $PORT, $DOMAINS and other variables.
-. ./.env
-
-# Template nginx config - replace {{VAR}} with their values in current scope, or empty string if not found.
-sed -f <(set | sed -n -e "s/^\([A-Z0-9_]*\)=\(.*\)/s#{{\1}}#\2#g/p") -e "s/{{.*}}//g" \
-    config/nginx | sudo tee /etc/nginx/sites-enabled/$PROJECT_NAME > /dev/null
+template config/nginx | sudo tee /etc/nginx/sites-enabled/$PROJECT_NAME > /dev/null
 
 sudo nginx -t -q
 sudo nginx -s reload
@@ -50,8 +54,8 @@ sudo nginx -s reload
 
 # 3. (Re)start project - ubuntu specific
 
-# Manually copy the upstart job as the symlink doesn't get started on server restart. 
-sudo cp -f config/upstart.conf /etc/init/$PROJECT_NAME.conf  
+# Template & copy the upstart job (symlink doesn't get started on server restart anyway).
+template config/upstart.conf | sudo tee /etc/init/$PROJECT_NAME.conf
 
 sudo initctl reload-configuration
 sudo stop $PROJECT_NAME || true
