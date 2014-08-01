@@ -1,4 +1,4 @@
-#!/bin/sh -e
+#!/bin/bash -e
 
 # This is a restart script for the project. It must have the executable bit set.
 
