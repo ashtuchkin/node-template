@@ -55,11 +55,12 @@ sudo nginx -s reload
 # 3. (Re)start project - ubuntu specific
 
 # Template & copy the upstart job (symlink doesn't get started on server restart anyway).
-template config/upstart.conf | sudo tee /etc/init/$PROJECT_NAME.conf
+template config/upstart.conf | sudo tee /etc/init/$PROJECT_NAME.conf > /dev/null
 
 sudo initctl reload-configuration
 sudo stop $PROJECT_NAME || true
 sudo start $PROJECT_NAME
+
 
 # 4. Look into the log file - it should output that is started correctly.
 
