@@ -57,10 +57,11 @@ sudo nginx -s reload
 # Template & copy the upstart job (symlink doesn't get started on server restart anyway).
 template config/upstart.conf | sudo tee /etc/init/$PROJECT_NAME.conf > /dev/null
 
-sudo initctl reload-configuration
-sudo stop $PROJECT_NAME || true
-sudo start $PROJECT_NAME
-
+if [[ $(status $PROJECT_NAME) =~ "start/running" ]] ; then
+  sudo restart $PROJECT_NAME
+else
+  sudo start $PROJECT_NAME
+fi
 
 # 4. Look into the log file - it should output that is started correctly.
 
